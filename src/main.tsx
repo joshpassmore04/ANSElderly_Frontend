@@ -1,9 +1,12 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
-import App from './App.tsx'
+import ANSElderly from './ANSElderly.tsx'
+import { UserStateProvider } from './util/UserState.tsx'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <App />
-  </StrictMode>,
+    <UserStateProvider>
+      <ANSElderly />
+    </UserStateProvider>
+  </StrictMode>
 )
