@@ -1,9 +1,10 @@
 import React, { createContext, useContext, useState, ReactNode } from 'react';
 
-interface User {
+export interface User {
   id: string | null;
-  name: string;
-  email: string;
+  firstName: string | null;
+  lastName: string | null;
+  email: string | null;
   loggedIn: boolean;
 }
 
@@ -29,8 +30,9 @@ interface UserStateProviderProps {
 export const UserStateProvider: React.FC<UserStateProviderProps> = ({ children }) => {
   const [user, setUser] = useState<User>({
     id: null,
-    name: '',
-    email: '',
+    firstName: null,
+    lastName: null,
+    email: null,
     loggedIn: false,
   });
 
