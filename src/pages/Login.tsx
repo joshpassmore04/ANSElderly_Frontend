@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState } from "react";
 import { LargePopup } from "../components/LargePopup";
 import { PopupActionButton } from "../components/PopupActionButton";
 import { User, useUser } from "../util/UserState";
