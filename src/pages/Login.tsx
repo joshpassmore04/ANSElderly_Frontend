@@ -5,6 +5,7 @@ import { User, useUser } from "../util/UserState";
 import { TextInput } from "../components/TextInput";
 import axios from "axios";
 import { useApiUrl } from "../util/ApiContext";
+import { makeBackendRequest } from "../util/Request";
 
 // Interface for login credentials
 interface LoginCredentials {
@@ -13,8 +14,8 @@ interface LoginCredentials {
 }
 
 interface RegisterCredentials extends LoginCredentials {
-    first_name: string;
-    last_name: string;
+    firstName: string;
+    lastName: string;
 }
 
 // Define the expected response type for login (example)
@@ -23,6 +24,22 @@ interface AuthResponse {
     message: string;
     session: User;
 }
+
+const loginRequest = async (loginCredentials: LoginCredentials) => {
+    return makeBackendRequest<AuthResponse>('user/login', loginCredentials);
+};
+
+const registerRequest = async (registerCredentials: RegisterCredentials) => {
+    const { email, password, firstName, lastName } = registerCredentials;
+    return makeBackendRequest<AuthResponse>("user/register", {
+        email,
+        password,
+        first_name: firstName,
+        last_name: lastName,
+    });
+};
+
+
 
 export const Login = () => {
     const { setUser } = useUser();
@@ -55,7 +72,7 @@ export const Login = () => {
     };
 
     const register = async (registerCredentials: RegisterCredentials) => {
-        const { email, password, first_name, last_name } = registerCredentials;
+        
         try {
             const response = await axios.post<AuthResponse>(`${apiUrl}api/v1/user/register`, {
                 email,
