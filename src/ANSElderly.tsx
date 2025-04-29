@@ -4,6 +4,8 @@ import { Routes } from "react-router";
 import { HashRouter } from "react-router";
 import Welcome from "./pages/Welcome";
 import { Login } from "./pages/Login";
+import { Home } from "./pages/Home";
+import { ProtectedRoute } from "./util/ProtectedRoute";
 
 function ANSElderly() {
   return (
@@ -17,6 +19,11 @@ function ANSElderly() {
             <Route index element={<Navigate to="welcome" replace />} />
             <Route path="welcome" element={<Welcome/>}/>
             <Route path="login" element={<Login/>}/>
+            <Route path="home" element={
+              <ProtectedRoute>
+                <Home/>
+              </ProtectedRoute>
+            }/>
           </Routes>
         </HashRouter>
       </div>

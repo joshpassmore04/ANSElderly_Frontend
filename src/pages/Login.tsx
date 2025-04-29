@@ -3,9 +3,9 @@ import { LargePopup } from "../components/LargePopup";
 import { PopupActionButton } from "../components/PopupActionButton";
 import { User, useUser } from "../util/UserState";
 import { TextInput } from "../components/TextInput";
-import axios from "axios";
-import { useApiUrl } from "../util/ApiContext";
 import { makeBackendRequest } from "../util/Request";
+import { useMutation } from "@tanstack/react-query";
+import { useNavigate } from "react-router";
 
 // Interface for login credentials
 interface LoginCredentials {
@@ -22,16 +22,16 @@ interface RegisterCredentials extends LoginCredentials {
 interface AuthResponse {
     status: string;
     message: string;
-    session: User;
+    session: Record<string, any>;
 }
 
 const loginRequest = async (loginCredentials: LoginCredentials) => {
-    return makeBackendRequest<AuthResponse>('user/login', loginCredentials);
+    return makeBackendRequest<AuthResponse>('/user/login', loginCredentials);
 };
 
 const registerRequest = async (registerCredentials: RegisterCredentials) => {
     const { email, password, firstName, lastName } = registerCredentials;
-    return makeBackendRequest<AuthResponse>("user/register", {
+    return makeBackendRequest<AuthResponse>("/user/register", {
         email,
         password,
         first_name: firstName,
@@ -39,11 +39,8 @@ const registerRequest = async (registerCredentials: RegisterCredentials) => {
     });
 };
 
-
-
 export const Login = () => {
     const { setUser } = useUser();
-    const apiUrl = useApiUrl();
     const [registering, setRegistering] = useState<boolean>(false);
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
     const [successMessage, setSuccessMessage] = useState<string | null>(null);
@@ -53,55 +50,68 @@ export const Login = () => {
     const [firstName, setFirstName] = useState<string>('');
     const [lastName, setLastName] = useState<string>('');
 
-    const login = async (loginCredentials: LoginCredentials) => {
-        try {
-            const response = await axios.post<AuthResponse>(`${apiUrl}api/v1/user/login`, loginCredentials);
-            const { status, session } = response.data;
-            if (status === "success") {
-                setSuccessMessage("Login successful! Welcome back.");
-                setErrorMessage(null)
-                setUser(session);
-                setTimeout
-            } else {
-                setErrorMessage("That didn't work. Perhaps try different credentials?");
-            }
-        } catch (error) {
-            setErrorMessage("That didn't work. Perhaps try different credentials?");
-            console.error(error);
-        }
-    };
+    const navigate = useNavigate();
 
-    const register = async (registerCredentials: RegisterCredentials) => {
-        
-        try {
-            const response = await axios.post<AuthResponse>(`${apiUrl}api/v1/user/register`, {
-                email,
-                password,
-                first_name: first_name,
-                last_name: last_name,
+    const redirectToHome = () => {
+        setTimeout(() => {
+            navigate("/home")
+        }, 1000)
+    }
+
+    // Mutation for login
+    const loginMutation = useMutation({
+        mutationFn: loginRequest,
+        onSuccess: (data) => {
+            setErrorMessage(null);
+            console.log("Login success data:", data.session);
+            const session = data.session
+            setUser({
+                id: session.id,
+                firstName: session.first_name,  // Mapping snake_case to camelCase
+                lastName: session.last_name,    // Mapping snake_case to camelCase
+                email: session.email,
+                loggedIn: true,
             });
-            const { status, session } = response.data;
-            if (status === "success") {
-                setSuccessMessage("Registration successful! Welcome!");
-                setErrorMessage(null)
-                setUser(session);
-                setRegistering(false);
-            } else {
-                setErrorMessage("Registration failed. Please try again. Did you fill out all the fields?");
-            }
-        } catch (error) {
-            setErrorMessage("Registration failed. Did you fill out all the fields?");
-            console.error(error);
-        }
-    };
+            setSuccessMessage(data.message); // Show success message
+            redirectToHome();
+        },
+        onError: (error: any) => {
+            setErrorMessage('Login failed');
+        },
+    });
+
+    // Mutation for registration
+    const registerMutation = useMutation({
+        mutationFn: registerRequest,
+        onSuccess: (data) => {
+            setErrorMessage(null);
+            setSuccessMessage(data.message); // Show success message
+            setRegistering(false); // Switch to login form
+        },
+        onError: (error: any) => {
+            setErrorMessage('Registration failed');
+        },
+    });
 
     const handleSubmit = (event: React.FormEvent) => {
         event.preventDefault();
         if (registering) {
-            register({ email, password, first_name: firstName, last_name: lastName });
+            registerMutation.mutate({ email, password, firstName, lastName });
         } else {
-            login({ email, password });
+            loginMutation.mutate({ email, password });
         }
+    };
+
+    const handleSwitchToRegister = () => {
+        setRegistering(true);
+        setSuccessMessage(null);  // Clear success message when switching to register
+        setErrorMessage(null);    // Clear error message when switching to register
+    };
+
+    const handleSwitchToLogin = () => {
+        setRegistering(false);
+        setSuccessMessage(null);  // Clear success message when switching to login
+        setErrorMessage(null);    // Clear error message when switching to login
     };
 
     return (
@@ -114,7 +124,6 @@ export const Login = () => {
 
                 {/* Main Content */}
                 <div className="flex flex-col justify-center items-center flex-grow">
-                    {/* Button positioned absolutely inside a relatively-positioned parent */}
                     <div className="absolute top-5 left-5">
                         <PopupActionButton
                             text="Go Back"
@@ -124,12 +133,10 @@ export const Login = () => {
                         />
                     </div>
 
-                    {/* Centered text */}
                     <div className="flex flex-col font-semibold justify-center items-center">
                         <p className="text-2xl font-semibold">{registering ? "Create an Account" : "Log in to your account"}</p>
                         <div className="pt-3 flex justify-center items-center">
                             <form onSubmit={handleSubmit} className="flex flex-col items-center">
-                                {/* Email and Password fields */}
                                 <div className="flex flex-col space-y-4">
                                     <TextInput
                                         placeholder="Email"
@@ -142,7 +149,6 @@ export const Login = () => {
                                         value={password}
                                         onChange={(e) => setPassword(e.target.value)}
                                     />
-                                    {/* Only show first and last name fields if registering */}
                                     {registering && (
                                         <>
                                             <TextInput
@@ -160,27 +166,24 @@ export const Login = () => {
                                 </div>
 
                                 <div className="flex items-center p-3">
-                                    {/* Show success or error message */}
                                     {successMessage && <div className="text-green-500 mt-4">{successMessage}</div>}
                                     {errorMessage && <div className="text-red-500 mt-4">{errorMessage}</div>}
                                 </div>
-                                {/* Submit Button */}
-                                <div className="flex-row items-center justify-center">
 
-                                    {/* Submit/Login Button */}
+                                <div className="flex-row items-center justify-center">
                                     <PopupActionButton
                                         text={registering ? "Submit" : "Login"}
                                         bgColor="bg-green-500"
-                                        type="submit" // Submit button
+                                        type="submit"
                                     />
-                                    {/* Show the "Register" button when not registering */}
+
                                     <div className="flex justify-center mt-4 space-x-4">
                                         {!registering && (
                                             <PopupActionButton
                                                 text="Register"
                                                 bgColor="bg-blue-500"
                                                 bgHover="bg-blue-800"
-                                                callback={() => setRegistering(true)} // Switch to registration form
+                                                callback={handleSwitchToRegister} // Switch to register form
                                             />
                                         )}
                                         {registering && (
@@ -188,7 +191,7 @@ export const Login = () => {
                                                 text="Cancel"
                                                 bgColor="bg-orange-500"
                                                 bgHover="bg-orange-800"
-                                                callback={() => setRegistering(false)}
+                                                callback={handleSwitchToLogin} // Switch to login form
                                             />
                                         )}
                                     </div>

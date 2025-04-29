@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState, ReactNode } from 'react';
 
 export interface User {
-  id: string | null;
+  id: number | null;
   firstName: string | null;
   lastName: string | null;
   email: string | null;
@@ -26,6 +26,7 @@ export const useUser = (): UserContextType => {
 interface UserStateProviderProps {
   children: ReactNode;
 }
+
 
 export const UserStateProvider: React.FC<UserStateProviderProps> = ({ children }) => {
   const [user, setUser] = useState<User>({
