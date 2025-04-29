@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { LargePopup } from "../components/LargePopup";
 import { PopupActionButton } from "../components/PopupActionButton";
-import { User, useUser } from "../util/UserState";
+import { useUser } from "../util/UserState";
 import { TextInput } from "../components/TextInput";
 import { makeBackendRequest } from "../util/Request";
 import { useMutation } from "@tanstack/react-query";
@@ -75,7 +75,7 @@ export const Login = () => {
             setSuccessMessage(data.message); // Show success message
             redirectToHome();
         },
-        onError: (error: any) => {
+        onError: () => {
             setErrorMessage('Login failed');
         },
     });
@@ -88,7 +88,7 @@ export const Login = () => {
             setSuccessMessage(data.message); // Show success message
             setRegistering(false); // Switch to login form
         },
-        onError: (error: any) => {
+        onError: () => {
             setErrorMessage('Registration failed');
         },
     });

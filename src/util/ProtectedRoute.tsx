@@ -4,8 +4,10 @@ import { useEffect, useState } from 'react';
 import { ReactNode } from 'react';
 import { makeBackendRequest } from './Request';
 import { useNavigate } from 'react-router';
+import { PermissionType } from './PermissionType';
 
 type ProtectedRouteProps = {
+  role?: PermissionType
   children: ReactNode;
 };
 
