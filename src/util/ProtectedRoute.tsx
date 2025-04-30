@@ -1,53 +1,61 @@
-'use client';
-
 import { useEffect, useState } from 'react';
 import { ReactNode } from 'react';
 import { makeBackendRequest } from './Request';
 import { useNavigate } from 'react-router';
-import { Role, RoleAction } from './Role';
+import { Role, useRoleCheck } from './Role';
 import { useUser } from './UserState';
 
 type ProtectedRouteProps = {
-  role?: Role
+  role?: Role; // `role` is now typed as `Role | undefined`
   children: ReactNode;
 };
 
 export function ProtectedRoute({ children, role }: ProtectedRouteProps) {
   const navigate = useNavigate();
-  const { user } = useUser();
+  const { user, setUser } = useUser();
   const [isLoading, setIsLoading] = useState(true);
-  const [isAllowed, setIsAllowed] = useState(false);
+  const [sessionChecked, setSessionChecked] = useState(false);
+
+  // Only call `useRoleCheck` if `role` is defined
+  const {
+    data: isAllowed,
+    isLoading: roleLoading,
+    isError,
+  } = useRoleCheck(role);
 
   useEffect(() => {
     const checkSession = async () => {
       try {
-        await makeBackendRequest('/user/@me', null, false);
-        if (role) {
-          if (user.loggedIn) {
-            await makeBackendRequest("/user/role", {
-              user_id: user.id,
-              role: role,
-              action: RoleAction.CHECK
-            })
-          } else {
-            throw new Error("Not logged in?")
-          }
-        }
-        setIsAllowed(true);
+        await makeBackendRequest("/user/@me", null, false);
+        setUser({
+          ...user,
+          loggedIn: true,
+        });
       } catch (e) {
-        navigate("/login")
+        console.error("Session check failed:", e);
+        navigate("/login");
       } finally {
-        setIsLoading(false);
+        setSessionChecked(true); // Always set this
       }
     };
-
-    checkSession();
+  
+    checkSession(); // Always run on mount
   }, [navigate]);
 
-  if (isLoading) return (
-    <div className="w-full h-full justify-center items-center animate-pulse">Loading...</div>
-  )
-  if (!isAllowed) return null; // optional, as redirect has already occurred
+  // If session is still being checked or role is loading, show loading spinner
+  if (!sessionChecked || (role && roleLoading)) {
+    return (
+      <div className="w-full h-full flex justify-center items-center animate-pulse">
+        Loading...
+      </div>
+    );
+  }
+
+  // If role check failed or user is not allowed, navigate to login
+  if (isError || (role && !isAllowed)) {
+    navigate("/login");
+    return null;
+  }
 
   return <>{children}</>;
 }
