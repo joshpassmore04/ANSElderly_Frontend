@@ -1,4 +1,9 @@
 export enum Role {
     DEFAULT = "default",
-    ADMIN = "admin"
+    MANAGER = "manager"
+}
+
+export enum RoleAction {
+    CHECK = "check",
+    SET = "set"
 }

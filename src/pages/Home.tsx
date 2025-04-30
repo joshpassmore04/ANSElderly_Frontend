@@ -9,6 +9,7 @@ export const Home = () => {
     const navigate = useNavigate();
     const { user } = useUser();
     const logOut = async () => {
+        user.loggedIn = false;
         return makeBackendRequest("/user/logout", null, false);
     };
 

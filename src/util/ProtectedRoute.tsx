@@ -4,15 +4,17 @@ import { useEffect, useState } from 'react';
 import { ReactNode } from 'react';
 import { makeBackendRequest } from './Request';
 import { useNavigate } from 'react-router';
-import { PermissionType } from './PermissionType';
+import { Role, RoleAction } from './Role';
+import { useUser } from './UserState';
 
 type ProtectedRouteProps = {
-  role?: PermissionType
+  role?: Role
   children: ReactNode;
 };
 
-export function ProtectedRoute({ children }: ProtectedRouteProps) {
+export function ProtectedRoute({ children, role }: ProtectedRouteProps) {
   const navigate = useNavigate();
+  const { user } = useUser();
   const [isLoading, setIsLoading] = useState(true);
   const [isAllowed, setIsAllowed] = useState(false);
 
@@ -20,6 +22,17 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
     const checkSession = async () => {
       try {
         await makeBackendRequest('/user/@me', null, false);
+        if (role) {
+          if (user.loggedIn) {
+            await makeBackendRequest("/user/role", {
+              user_id: user.id,
+              role: role,
+              action: RoleAction.CHECK
+            })
+          } else {
+            throw new Error("Not logged in?")
+          }
+        }
         setIsAllowed(true);
       } catch (e) {
         navigate("/login")

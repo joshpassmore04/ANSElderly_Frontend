@@ -7,6 +7,7 @@ import { Login } from "./pages/Login";
 import { Home } from "./pages/Home";
 import { ProtectedRoute } from "./util/ProtectedRoute";
 import { Admin } from "./pages/Admin";
+import { Role } from "./util/Role";
 
 function ANSElderly() {
   return (
@@ -26,7 +27,7 @@ function ANSElderly() {
               </ProtectedRoute>
             }/>
             <Route path="admin" element={
-              <ProtectedRoute>
+              <ProtectedRoute role={Role.MANAGER}>
                 <Admin/>
               </ProtectedRoute>
             }/>
