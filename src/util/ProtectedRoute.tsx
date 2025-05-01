@@ -13,7 +13,6 @@ type ProtectedRouteProps = {
 export function ProtectedRoute({ children, role }: ProtectedRouteProps) {
   const navigate = useNavigate();
   const { user, setUser } = useUser();
-  const [isLoading, setIsLoading] = useState(true);
   const [sessionChecked, setSessionChecked] = useState(false);
 
   // Only call `useRoleCheck` if `role` is defined

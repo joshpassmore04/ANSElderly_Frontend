@@ -1,4 +1,4 @@
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query";
 import { PopupActionButton } from "../components/PopupActionButton"
 import { makeBackendRequest } from "../util/Request";
 import { useNavigate } from "react-router";

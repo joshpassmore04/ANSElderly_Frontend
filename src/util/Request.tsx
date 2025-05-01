@@ -10,7 +10,7 @@ export async function makeBackendRequest<T>(
     post: boolean = true
 ): Promise<T> {
     const params = new URLSearchParams(window.location.search);
-    const apiUrl = params.get("apiUrl") ?? "http://127.0.0.1:5000/";
+    let apiUrl = params.get("apiUrl") ?? "http://127.0.0.1:5000/";
 
     let response;
     if (post) {

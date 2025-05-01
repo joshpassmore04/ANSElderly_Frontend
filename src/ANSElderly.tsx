@@ -8,6 +8,8 @@ import { Home } from "./pages/Home";
 import { ProtectedRoute } from "./util/ProtectedRoute";
 import { Admin } from "./pages/Admin";
 import { Role } from "./util/Role";
+import { Location } from "./pages/admin/Location";
+import { FormProvider } from "./components/FormContext";
 
 function ANSElderly() {
   return (
@@ -19,18 +21,28 @@ function ANSElderly() {
         <HashRouter>
           <Routes>
             <Route index element={<Navigate to="welcome" replace />} />
-            <Route path="welcome" element={<Welcome/>}/>
-            <Route path="login" element={<Login/>}/>
+            <Route path="welcome" element={<Welcome />} />
+            <Route path="login" element={<Login />} />
             <Route path="home" element={
               <ProtectedRoute>
-                <Home/>
+                <Home />
               </ProtectedRoute>
-            }/>
+            } />
             <Route path="admin" element={
               <ProtectedRoute role={Role.MANAGER}>
-                <Admin/>
+                <Admin />
               </ProtectedRoute>
-            }/>
+            }>
+              <Route
+                path="location"
+                element={
+                  <FormProvider>
+                    <Location />
+                  </FormProvider>
+                }
+              />
+              {/* Other sub-routes */}
+            </Route>
           </Routes>
         </HashRouter>
       </div>

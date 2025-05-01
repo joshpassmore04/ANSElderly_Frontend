@@ -34,7 +34,7 @@ export const PopupActionButton: React.FC<PopupActionButtonProps> = ({
   return (
     <button
       type={type} // Set the button type (can be "button", "submit", or "reset")
-      className={`${bgColor} text-white lg:w-32 w-16 py-2 justify-center align-middle text-nowrap rounded-md md:px-5 lg:px-6 transition-transform duration-150 md:text-sm lg:text-2xl hover:${bgHover} active:scale-125 ease-out shadow-lg`}
+      className={`${bgColor} text-white lg:min-w-32 min-w-16 py-2 justify-center align-middle text-nowrap rounded-md md:px-5 lg:px-6 transition-transform duration-150 md:text-sm lg:text-2xl hover:${bgHover} active:scale-125 ease-out shadow-lg`}
       onClick={handleClick}
     >
       {text}
